@@ -10,7 +10,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "MATT - Comedian",
   description:
-    "Official website of Matt - Comedian, Actor, and Entertainer. Get VIP passes, show tickets, merchandise and more.",
+    "Official website of Matt - Comedian, Actor, and Entertainer. Get fan cards, show tickets, merchandise and more.",
   generator: "v0.app",
   icons: {
     icon: [

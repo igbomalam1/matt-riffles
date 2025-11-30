@@ -13,9 +13,9 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 const cardData = {
-  gold: { name: "Gold VIP", price: 1200, access: "12 Shows" },
-  platinum: { name: "Platinum VIP", price: 850, access: "8 Shows" },
-  silver: { name: "Silver VIP", price: 475, access: "3 Shows" },
+  gold: { name: "Gold Fan", price: 1200, access: "12 Shows" },
+  platinum: { name: "Platinum Fan", price: 850, access: "8 Shows" },
+  silver: { name: "Silver Fan", price: 475, access: "3 Shows" },
 }
 
 export default function VIPCardPage({
@@ -95,7 +95,7 @@ export default function VIPCardPage({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Request failed" }))
-        throw new Error(typeof err.error === "string" ? err.error : "Failed to submit VIP card")
+        throw new Error(typeof err.error === "string" ? err.error : "Failed to submit fan card")
       }
 
       const { id } = await res.json()
@@ -103,7 +103,7 @@ export default function VIPCardPage({
       setLastPhotoUrl(photoUrl)
       setShowSuccess(true)
     } catch (error) {
-      console.error("Error submitting VIP card:", error)
+      console.error("Error submitting fan card:", error)
       alert("There was an error submitting your application. Please try again.")
     } finally {
       setIsSubmitting(false)
@@ -151,7 +151,7 @@ export default function VIPCardPage({
     ctx.fillStyle = "#ffffff"
     ctx.textAlign = "center"
     ctx.font = "700 72px Georgia, Times, serif"
-    ctx.fillText("MATT RIFFLE VIP", 0, 0)
+    ctx.fillText("MATT RIFFLE FAN", 0, 0)
     ctx.globalAlpha = 1
     ctx.restore()
 
@@ -251,7 +251,7 @@ export default function VIPCardPage({
     ctx.fillStyle = p.text
     ctx.font = "700 56px Georgia, Times, serif"
     ctx.textAlign = "center"
-    ctx.fillText("VIP", emblemX, emblemY + 30)
+    ctx.fillText("FAN", emblemX, emblemY + 30)
     ctx.restore()
 
     const drawBarcode = (code: string, x: number, y: number, w: number, h: number) => {
@@ -266,7 +266,7 @@ export default function VIPCardPage({
         if (offset >= x + w) break
       }
     }
-    const code = `${nameText}|${region}` || "VIP"
+    const code = `${nameText}|${region}` || "FAN"
     const contentX = 330
     const contentW = 360
     const barcodeW = contentW - 40
@@ -324,7 +324,7 @@ export default function VIPCardPage({
                 className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer shadow-xl"
                 onClick={handleFlip}
               >
-                <NextImage src={`/images/vip-${type}.jpg`} alt={`${card.name} VIP Card`} fill className="object-cover" />
+                <NextImage src={`/images/vip-${type}.jpg`} alt={`${card.name} Fan Card`} fill className="object-cover" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                   <span className="text-white text-xl font-semibold">Tap to Enter Info</span>
                 </div>
@@ -409,7 +409,7 @@ export default function VIPCardPage({
             </DialogHeader>
             {previewUrl && (
               <div className="w-full">
-                <img src={previewUrl} alt="VIP Card Preview" className="w-full h-auto rounded" />
+                <img src={previewUrl} alt="Fan Card Preview" className="w-full h-auto rounded" />
                 <Button
                   onClick={() => {
                     if (!previewUrl) return

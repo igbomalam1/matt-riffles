@@ -34,13 +34,12 @@ export function SettingsTab() {
   }, [])
 
   const fetchSettings = async () => {
-    const supabase = createClient()
-    const { data } = await supabase.from("admin_settings").select("*")
-
-    if (data) {
-      const walletSetting = data.find((s) => s.key === "btc_wallet")
-      const signatureSetting = data.find((s) => s.key === "signature_url")
-
+    const res = await fetch("/api/admin/settings")
+    if (res.ok) {
+      const json = await res.json()
+      const data = json.settings || []
+      const walletSetting = data.find((s: any) => s.key === "btc_wallet")
+      const signatureSetting = data.find((s: any) => s.key === "signature_url")
       if (walletSetting) setBtcWallet(walletSetting.value)
       if (signatureSetting) setSignatureUrl(signatureSetting.value)
     }
@@ -48,23 +47,21 @@ export function SettingsTab() {
   }
 
   const fetchShows = async () => {
-    const supabase = createClient()
-    const { data } = await supabase.from("shows").select("*").order("date", { ascending: true })
-
-    if (data) {
-      setShows(data)
+    const res = await fetch("/api/admin/shows")
+    if (res.ok) {
+      const json = await res.json()
+      setShows(json.shows || [])
     }
   }
 
   const saveWallet = async () => {
     setIsSaving(true)
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from("admin_settings")
-      .upsert({ key: "btc_wallet", value: btcWallet, updated_at: new Date().toISOString() })
-
-    if (!error) {
+    const res = await fetch("/api/admin/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ btc_wallet: btcWallet }),
+    })
+    if (res.ok) {
       alert("BTC wallet address saved!")
     }
     setIsSaving(false)
@@ -84,45 +81,39 @@ export function SettingsTab() {
         data: { publicUrl },
       } = supabase.storage.from("product-images").getPublicUrl(fileName)
 
-      await supabase
-        .from("admin_settings")
-        .upsert({ key: "signature_url", value: publicUrl, updated_at: new Date().toISOString() })
-
-      setSignatureUrl(publicUrl)
-      setSignatureFile(null)
-      alert("Signature uploaded!")
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signature_url: publicUrl }),
+      })
+      if (res.ok) {
+        setSignatureUrl(publicUrl)
+        setSignatureFile(null)
+        alert("Signature uploaded!")
+      }
     }
     setIsSaving(false)
   }
 
   const saveShow = async () => {
-    const supabase = createClient()
-
     if (editingShow) {
-      const { error } = await supabase
-        .from("shows")
-        .update({
-          date: showForm.date,
-          city: showForm.city,
-          venue: showForm.venue,
-          ticket_status: showForm.ticket_status,
-        })
-        .eq("id", editingShow.id)
-
-      if (!error) {
+      const res = await fetch("/api/admin/shows", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingShow.id, ...showForm }),
+      })
+      if (res.ok) {
         fetchShows()
         setShowDialog(false)
         resetShowForm()
       }
     } else {
-      const { error } = await supabase.from("shows").insert({
-        date: showForm.date,
-        city: showForm.city,
-        venue: showForm.venue,
-        ticket_status: showForm.ticket_status,
+      const res = await fetch("/api/admin/shows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(showForm),
       })
-
-      if (!error) {
+      if (res.ok) {
         fetchShows()
         setShowDialog(false)
         resetShowForm()
@@ -132,11 +123,8 @@ export function SettingsTab() {
 
   const deleteShow = async (id: string) => {
     if (!confirm("Are you sure you want to delete this show?")) return
-
-    const supabase = createClient()
-    const { error } = await supabase.from("shows").delete().eq("id", id)
-
-    if (!error) {
+    const res = await fetch(`/api/admin/shows?id=${encodeURIComponent(id)}`, { method: "DELETE" })
+    if (res.ok) {
       fetchShows()
     }
   }

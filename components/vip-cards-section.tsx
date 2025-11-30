@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { useRouter } from "next/navigation"
 
 interface VIPCardData {
@@ -21,9 +22,9 @@ interface VIPCardData {
 }
 
 const vipCards: VIPCardData[] = [
-  { type: "silver", name: "Silver VIP", price: 475, access: "3 Shows" },
-  { type: "gold", name: "Gold VIP", price: 1200, access: "12 Shows" },
-  { type: "platinum", name: "Platinum VIP", price: 850, access: "8 Shows" },
+  { type: "silver", name: "Silver Fan", price: 475, access: "3 Shows" },
+  { type: "gold", name: "Gold Fan", price: 1200, access: "12 Shows" },
+  { type: "platinum", name: "Platinum Fan", price: 850, access: "8 Shows" },
 ]
 
 export function VIPCardsSection() {
@@ -35,6 +36,26 @@ export function VIPCardsSection() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [generatedCardId, setGeneratedCardId] = useState<string | null>(null)
   const router = useRouter()
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  useEffect(() => {
+    if (!carouselApi) return
+    setCurrentIndex(carouselApi.selectedScrollSnap())
+    const onSelect = () => setCurrentIndex(carouselApi.selectedScrollSnap())
+    carouselApi.on("select", onSelect)
+  }, [carouselApi])
+
+  useEffect(() => {
+    if (!carouselApi) return
+    const id = setInterval(() => {
+      if (carouselApi.canScrollNext()) {
+        carouselApi.scrollNext()
+      } else {
+        carouselApi.scrollTo(0)
+      }
+    }, 3500)
+    return () => clearInterval(id)
+  }, [carouselApi])
 
   const [formData, setFormData] = useState({
     name: "",
@@ -94,7 +115,7 @@ export function VIPCardsSection() {
         photoUrl = publicUrl
       }
 
-      // Insert VIP card application
+      // Insert card application
       const { data, error } = await supabase
         .from("vip_cards")
         .insert({
@@ -115,7 +136,7 @@ export function VIPCardsSection() {
       setIsFlipped(false)
       setFormData({ name: "", address: "", waybillAddress: "", photo: null })
     } catch (error) {
-      console.error("Error submitting VIP card:", error)
+      console.error("Error submitting fan card:", error)
       alert("There was an error submitting your application. Please try again.")
     } finally {
       setIsSubmitting(false)
@@ -139,7 +160,7 @@ export function VIPCardsSection() {
   return (
     <section className="py-16 px-4 bg-secondary">
       <div className="container mx-auto max-w-6xl">
-        <h2 className="text-3xl font-bold text-center mb-12 text-foreground">VIP Access Cards</h2>
+        <h2 className="text-3xl font-bold text-center mb-12 text-foreground">Fan Cards</h2>
 
         {/* Cards Display */}
         <div className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 mb-12">
@@ -159,11 +180,27 @@ export function VIPCardsSection() {
             </div>
           </div>
 
-          {/* Mobile: Stacked layout */}
-          <div className="flex md:hidden flex-col gap-4">
-            <VIPCardDisplay card={vipCards[1]} size="large" featured />
-            <VIPCardDisplay card={vipCards[2]} size="medium" />
-            <VIPCardDisplay card={vipCards[0]} size="medium" />
+          {/* Mobile: Carousel */}
+          <Carousel className="md:hidden w-full" setApi={setCarouselApi} opts={{ loop: true, align: "start" }}>
+            <CarouselContent>
+              {vipCards.map((card, idx) => (
+                <CarouselItem key={card.type}>
+                  <div className="px-2">
+                    <VIPCardDisplay card={card} size={idx === 1 ? "large" : "medium"} featured={idx === 1} />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="md:hidden flex justify-center items-center gap-2 mt-4" aria-label="Slide indicators">
+            {vipCards.map((_, idx) => (
+              <button
+                key={idx}
+                className={`h-2 w-2 rounded-full ${currentIndex === idx ? "bg-gold" : "bg-muted"}`}
+                onClick={() => carouselApi?.scrollTo(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
 
@@ -181,8 +218,8 @@ export function VIPCardsSection() {
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="bg-white">
             <DialogHeader>
-              <DialogTitle>Select Your VIP Card</DialogTitle>
-              <DialogDescription>Choose your VIP membership tier for exclusive access to shows.</DialogDescription>
+              <DialogTitle>Select Your Fan Card</DialogTitle>
+              <DialogDescription>Choose your fan membership tier for exclusive access to shows.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <Select onValueChange={handleCardSelect}>
@@ -222,7 +259,7 @@ export function VIPCardsSection() {
                   >
                     <Image
                       src={`/images/vip-${selectedCard?.type}.jpg`}
-                      alt={`${selectedCard?.name} VIP Card`}
+                      alt={`${selectedCard?.name} Fan Card`}
                       fill
                       className="object-cover"
                     />
@@ -327,22 +364,17 @@ function VIPCardDisplay({
     large: "w-72 h-44",
   }
 
-  const bgColors = {
-    gold: "bg-gradient-to-br from-gold to-gold-deep",
-    platinum: "bg-gradient-to-br from-gray-300 to-gray-400",
-    silver: "bg-gradient-to-br from-gray-200 to-gray-300",
-  }
-
   return (
-    <div
-      className={`${sizeClasses[size]} ${bgColors[card.type]} rounded-xl p-4 flex flex-col justify-between shadow-lg ${featured ? "ring-2 ring-gold" : ""}`}
-    >
-      <div>
-        <h3 className="font-bold text-black text-lg">{card.name}</h3>
-        <p className="text-sm text-black/70">{card.access}</p>
-      </div>
-      <div className="text-right">
-        <span className="text-2xl font-bold text-black">${card.price}</span>
+    <div className={`${sizeClasses[size]} rounded-xl overflow-hidden shadow-lg ${featured ? "ring-2 ring-gold" : ""}`}>
+      <div className="relative w-full h-full">
+        <Image src={`/images/vip-${card.type}.jpg`} alt={`${card.name} Fan Card`} fill className="object-cover" />
+        <div className="absolute inset-x-0 bottom-0 bg-black/40 text-white p-2 flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-sm md:text-base">{card.name}</h3>
+            <p className="text-xs opacity-80">{card.access}</p>
+          </div>
+          <span className="text-sm md:text-lg font-bold">${card.price}</span>
+        </div>
       </div>
     </div>
   )

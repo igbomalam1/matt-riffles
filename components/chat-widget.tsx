@@ -73,6 +73,11 @@ export function ChatWidget() {
     if (storedOpen === "true") {
       setIsOpen(true)
     }
+    const autoFlag = localStorage.getItem("chatHasShownAutoOpen")
+    if (!autoFlag) {
+      setIsOpen(true)
+      localStorage.setItem("chatHasShownAutoOpen", "true")
+    }
   }, [])
 
   // Scroll to bottom when messages change
@@ -336,12 +341,15 @@ export function ChatWidget() {
       {/* Chat Button */}
       <button
         onClick={handleOpenChat}
-        className="fixed bottom-6 right-6 z-50 bg-gold hover:bg-gold-deep text-black p-4 rounded-full shadow-lg transition-transform hover:scale-110 relative"
         aria-label="Open chat"
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        className="fixed bottom-4 right-4 left-auto sm:bottom-6 sm:right-6 z-[9999] pointer-events-auto bg-black text-white border border-gold/70 hover:border-gold-deep rounded-full h-12 w-auto px-4 sm:h-14 sm:px-5 inline-flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gold-deep outline-none"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-7 h-7" />
+        <span className="text-sm font-semibold">Chat</span>
         {totalUnread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-urgent text-white text-xs px-2 py-0.5 rounded-full">
+          <span className="absolute -top-1 -right-1 bg-urgent text-white text-[10px] leading-none px-1.5 py-[2px] rounded-full">
             {totalUnread}
           </span>
         )}

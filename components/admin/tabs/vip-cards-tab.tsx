@@ -84,7 +84,7 @@ export function VIPCardsTab() {
     ctx.fillStyle = "#ffffff"
     ctx.textAlign = "center"
     ctx.font = "700 72px Georgia, Times, serif"
-    ctx.fillText("MATT RIFFLE VIP", 0, 0)
+    ctx.fillText("MATT RIFFLE FAN", 0, 0)
     ctx.globalAlpha = 1
     ctx.restore()
 
@@ -213,12 +213,12 @@ export function VIPCardsTab() {
     const barcodeWidth = GRID.content.w - 40
     const barcodeX = GRID.content.x + 20
     const barcodeY = y
-    drawBarcode(card.id || "VIP123456", barcodeX, barcodeY, barcodeWidth, 32)
+    drawBarcode(card.id || "FAN123456", barcodeX, barcodeY, barcodeWidth, 32)
     y += 42
     ctx.fillStyle = p.accent
     ctx.font = "500 12px Georgia, Times, serif"
     ctx.textAlign = "center"
-    ctx.fillText(`Verify: riffle.com/verify/${(card.id || "VIP123456").toUpperCase()}`, contentCX, barcodeY + 46)
+    ctx.fillText(`Verify: riffle.com/verify/${(card.id || "FAN123456").toUpperCase()}`, contentCX, barcodeY + 46)
 
     const drawStar = (cx: number, cy: number, spikes: number, outerR: number, innerR: number, color: string) => {
       let rot = (Math.PI / 2) * 3
@@ -271,7 +271,7 @@ export function VIPCardsTab() {
     ctx.fillStyle = p.text
     ctx.font = "700 48px Georgia, Times, serif"
     ctx.textAlign = "center"
-    ctx.fillText("VIP", emblemX, emblemY + 25)
+    ctx.fillText("FAN", emblemX, emblemY + 25)
     ctx.restore()
 
     // Signature area left-bottom aligned to emblem level
@@ -354,7 +354,7 @@ export function VIPCardsTab() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">VIP Card Applications</h2>
+      <h2 className="text-2xl font-bold mb-6">Fan Card Applications</h2>
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -372,7 +372,7 @@ export function VIPCardsTab() {
             {cards.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
-                  No VIP card applications yet
+                  No fan card applications yet
                 </TableCell>
               </TableRow>
             ) : (
@@ -452,7 +452,7 @@ export function VIPCardsTab() {
           </DialogHeader>
           {previewUrl && (
             <div>
-              <img src={previewUrl || "/placeholder.svg"} alt="VIP Card Preview" className="w-full h-auto rounded" />
+              <img src={previewUrl || "/placeholder.svg"} alt="Fan Card Preview" className="w-full h-auto rounded" />
               <div className="mt-4 flex items-center gap-3">
                 <input
                   type="file"
@@ -473,7 +473,7 @@ export function VIPCardsTab() {
                   if (!previewUrl) return
                   const a = document.createElement("a")
                   a.href = previewUrl
-                  a.download = `vip-card-preview.png`
+                  a.download = `fan-card-preview.png`
                   a.click()
                 }}
                 className="mt-4 w-full bg-gold hover:bg-gold-deep text-black"

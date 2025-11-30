@@ -105,7 +105,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Nav */}
-          <div className="md:hidden flex items-center justify-end w-full">
+          <div className="md:hidden flex items-center justify-center w-full">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open menu">
