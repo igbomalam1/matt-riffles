@@ -204,13 +204,13 @@ export function VIPCardsSection() {
           </div>
         </div>
 
-        {/* Get Your Ticket Button */}
+        {/* Fan Card CTA Button */}
         <div className="flex justify-center">
           <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-gold hover:bg-gold-deep text-black font-bold px-8 py-6 text-lg transition-transform hover:scale-105"
           >
-            Get Your Ticket
+            Apply for Fan Card
           </Button>
         </div>
 

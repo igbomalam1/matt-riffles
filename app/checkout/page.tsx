@@ -43,6 +43,7 @@ export default function CheckoutPage() {
   const [btcWallet, setBtcWallet] = useState("")
   const [copied, setCopied] = useState(false)
   const [showCardMessage, setShowCardMessage] = useState(false)
+  const [ticketPassUrl, setTicketPassUrl] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -175,7 +176,7 @@ export default function CheckoutPage() {
         order_number: newOrderNumber,
         customer_name: formData.name,
         customer_email: formData.email,
-        shipping_address: formData.address,
+        shipping_address: item?.type === "ticket" ? "Digital Ticket - Mobile Entry" : formData.address,
         items: [item],
         total_amount: item.price * item.quantity,
         payment_method: formData.paymentMethod,
@@ -187,6 +188,60 @@ export default function CheckoutPage() {
 
       setOrderNumber(newOrderNumber)
       setShowSuccess(true)
+      if (item?.type === "ticket") {
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = 720
+          canvas.height = 420
+          const ctx = canvas.getContext("2d")
+          if (ctx) {
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+            grad.addColorStop(0, "#111827")
+            grad.addColorStop(1, "#374151")
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+            ctx.fillStyle = "#ffffff"
+            ctx.font = "700 22px system-ui, -apple-system, Segoe UI"
+            ctx.fillText("MATT RIFFLE SHOW TICKET", 24, 40)
+
+            ctx.font = "600 18px system-ui, -apple-system, Segoe UI"
+            ctx.fillText(item.name || "Show Ticket", 24, 80)
+            if (item.venue) ctx.fillText(String(item.venue), 24, 110)
+            if (item.showDate) ctx.fillText(new Date(item.showDate).toLocaleString(), 24, 140)
+
+            ctx.font = "500 16px system-ui, -apple-system, Segoe UI"
+            ctx.fillStyle = "#d1d5db"
+            ctx.fillText(`Order: ${newOrderNumber}`, 24, 175)
+
+            const code = `${newOrderNumber}|${item.showId || ""}`
+            const x = 24
+            const y = 210
+            const h = 140
+            let offset = x
+            for (let i = 0; i < 220; i++) {
+              const c = code.charCodeAt(i % code.length)
+              const w = 2 + (c % 4)
+              ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#e5e7eb"
+              ctx.fillRect(offset, y, w, h)
+              offset += w + 1
+              if (offset >= canvas.width - 24) break
+            }
+
+            ctx.fillStyle = "#10b981"
+            ctx.beginPath()
+            ctx.arc(canvas.width - 60, 60, 28, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.fillStyle = "#ffffff"
+            ctx.font = "700 24px system-ui"
+            ctx.textAlign = "center"
+            ctx.fillText("OK", canvas.width - 60, 68)
+            ctx.textAlign = "left"
+
+            setTicketPassUrl(canvas.toDataURL("image/png"))
+          }
+        } catch {}
+      }
       localStorage.removeItem("checkoutItem")
     } catch (error) {
       console.error("Error creating order:", error)
@@ -218,15 +273,13 @@ Payment Method: ${formData.paymentMethod?.replace("_", " ").toUpperCase()}
 
 Customer: ${formData.name}
 Email: ${formData.email}
-Shipping Address: ${formData.address}
+Shipping Address: ${item?.type === "ticket" ? "Digital Ticket - Mobile Entry" : formData.address}
 
 ================================
-Your order will be processed within 
-4-7 days depending on location, 
-item availability, and team schedule.
+Ticket delivery may be closer to the event date due to team, artist or venue restrictions. But don't worry, we guarantee you'll receive them in time for your event!
 
 Thank you for your purchase!
-================================
+=================================
     `
 
     const blob = new Blob([receiptContent], { type: "text/plain" })
@@ -344,8 +397,13 @@ Thank you for your purchase!
                       onClick={() => {
                         if (!validateEmail(formData.email)) return pushAssistant("Invalid email. Please try again.")
                         pushUser(formData.email)
-                        setStep(3)
-                        pushAssistant("Please enter your shipping address...")
+                        if (item?.type === "ticket") {
+                          setStep(4)
+                          pushAssistant("Select your payment method: Card, Gift Card, or Cryptocurrency")
+                        } else {
+                          setStep(3)
+                          pushAssistant("Please enter your shipping address...")
+                        }
                       }}
                       className="bg-gold text-black"
                     >
@@ -355,7 +413,7 @@ Thank you for your purchase!
                 )}
 
                 {/* Step 3: Address */}
-                {step === 3 && (
+                {item?.type !== "ticket" && step === 3 && (
                   <div className="flex gap-2">
                     <Textarea
                       placeholder="Enter your full shipping address"
@@ -789,6 +847,34 @@ Thank you for your purchase!
               <p className="text-sm text-muted-foreground mb-1">Order Number</p>
               <p className="font-mono font-bold">{orderNumber}</p>
             </div>
+            {item.type === "ticket" && (
+              <div className="border rounded-lg p-4">
+                <h4 className="font-semibold mb-2">Mobile Ticket</h4>
+                <p className="text-sm text-muted-foreground mb-3">Present this on your phone at the entrance.</p>
+                <p className="text-xs text-muted-foreground mb-3">Note: Price and payment will be verified at the entrance. We perform manual verification of payments.</p>
+                <div className="rounded-lg overflow-hidden border bg-secondary">
+                  {ticketPassUrl ? (
+                    <img src={ticketPassUrl} alt="Ticket Barcode" className="w-full h-auto" />
+                  ) : (
+                    <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">Generating...</div>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <Button
+                    onClick={() => {
+                      if (!ticketPassUrl) return
+                      const a = document.createElement("a")
+                      a.href = ticketPassUrl
+                      a.download = `ticket-${orderNumber}.png`
+                      a.click()
+                    }}
+                    className="bg-urgent hover:bg-urgent/90 text-white"
+                  >
+                    Download Mobile Ticket
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="border-t pt-4">
               <h4 className="font-semibold mb-2">Order Details</h4>
               <p className="text-sm">{item.name}</p>
@@ -796,7 +882,7 @@ Thank you for your purchase!
               <p className="text-sm font-bold mt-2">Total: ${total}</p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your order will be processed within 4-7 days depending on location, item availability, and team schedule.
+              Ticket delivery may be closer to the event date due to team, artist or venue restrictions. But don't worry, we guarantee you'll receive them in time for your event!
             </p>
             <div className="flex gap-2">
               <Button onClick={generateReceipt} variant="outline" className="flex-1 bg-transparent">
