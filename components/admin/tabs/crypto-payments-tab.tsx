@@ -4,12 +4,14 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
 import type { Order } from "@/lib/types"
 
 export function CryptoPaymentsTab() {
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [comment, setComment] = useState("")
 
   useEffect(() => {
     fetchOrders()
@@ -25,11 +27,11 @@ export function CryptoPaymentsTab() {
     setIsLoading(false)
   }
 
-  const confirmPayment = async (id: string) => {
+  const updateStatus = async (id: string, status: "approved" | "rejected" | "shipped" | "completed") => {
     const res = await fetch("/api/admin/orders", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status: "approved" }),
+      body: JSON.stringify({ id, status, comment: comment?.trim() || null }),
     })
     if (res.ok) fetchOrders()
   }
@@ -92,21 +94,52 @@ export function CryptoPaymentsTab() {
                   <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell>
-                    {order.status === "pending" && (
-                      <Button
-                        size="sm"
-                        onClick={() => confirmPayment(order.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        Confirm Payment Received
-                      </Button>
-                    )}
+                    <div className="flex gap-1 flex-wrap">
+                      {order.status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => updateStatus(order.id, "approved")}
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                          >
+                            Confirm Payment
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => updateStatus(order.id, "rejected")}
+                            className="text-xs"
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      {order.status === "approved" && (
+                        <Button
+                          size="sm"
+                          onClick={() => updateStatus(order.id, "shipped")}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                        >
+                          Ship/Deliver
+                        </Button>
+                      )}
+                      {order.status === "shipped" && (
+                        <Button size="sm" onClick={() => updateStatus(order.id, "completed")} className="text-xs">
+                          Complete
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-xs text-muted-foreground mb-1">Add Admin Comment</p>
+        <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional comment for status changes" />
       </div>
     </div>
   )

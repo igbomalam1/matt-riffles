@@ -27,6 +27,17 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Audit logs for admin actions on orders
+CREATE TABLE IF NOT EXISTS order_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL,
+  actor_id TEXT NOT NULL,
+  actor_email TEXT,
+  action TEXT NOT NULL,
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Show bookings table
 CREATE TABLE IF NOT EXISTS shows (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -88,6 +99,7 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
 -- Enable RLS on all tables (admin-only access via service role)
 ALTER TABLE vip_cards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE presale_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE city_requests ENABLE ROW LEVEL SECURITY;
@@ -101,6 +113,7 @@ CREATE POLICY "Anyone can view shows" ON shows FOR SELECT USING (true);
 -- Allow public inserts for customer-facing forms (no auth required)
 CREATE POLICY "Anyone can submit VIP applications" ON vip_cards FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can create orders" ON orders FOR INSERT WITH CHECK (true);
+-- Admin audit logs are service-role only; no public policies
 CREATE POLICY "Anyone can submit presale requests" ON presale_requests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can submit city requests" ON city_requests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can send chat messages" ON chat_messages FOR INSERT WITH CHECK (true);

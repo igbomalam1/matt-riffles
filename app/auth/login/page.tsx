@@ -20,6 +20,12 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseAnon) {
+      setError("Supabase configuration missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.")
+      return
+    }
     const supabase = createClient()
     setIsLoading(true)
     setError(null)
@@ -32,7 +38,14 @@ export default function LoginPage() {
       if (error) throw error
       router.push("/admin")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      const msg = error instanceof Error ? error.message : "An error occurred"
+      if (/Failed to fetch/i.test(msg) || /timed out/i.test(msg)) {
+        setError("Network error reaching Supabase. Please check connectivity and try again.")
+      } else if (/No API key/i.test(msg)) {
+        setError("Invalid Supabase configuration. Ensure the anon key is set.")
+      } else {
+        setError(msg)
+      }
     } finally {
       setIsLoading(false)
     }

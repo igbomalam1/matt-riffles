@@ -4,12 +4,17 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
 import type { Order } from "@/lib/types"
 
 export function ShopOrdersTab() {
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [comment, setComment] = useState("")
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     fetchOrders()
@@ -32,7 +37,7 @@ export function ShopOrdersTab() {
     const res = await fetch("/api/admin/orders", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status }),
+      body: JSON.stringify({ id, status, comment: comment?.trim() || null }),
     })
     if (res.ok) fetchOrders()
   }
@@ -100,6 +105,18 @@ export function ShopOrdersTab() {
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          setComment("")
+                          setOpen(true)
+                        }}
+                      >
+                        View
+                      </Button>
                       {order.status === "pending" && (
                         <>
                           <Button
@@ -141,6 +158,84 @@ export function ShopOrdersTab() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Order ID</p>
+                  <p className="font-mono text-sm">{selectedOrder.order_number}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Date</p>
+                  <p className="text-sm">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Customer</p>
+                  <p className="text-sm">{selectedOrder.customer_name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm">{selectedOrder.customer_email}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Items</p>
+                <div className="rounded border">
+                  <ul className="divide-y">
+                    {selectedOrder.items.map((it, idx) => (
+                      <li key={idx} className="p-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="font-medium">{it.name}</span>
+                          <span>${it.price} × {it.quantity}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {it.size && <span>Size: {it.size} · </span>}
+                          {it.format && <span>Format: {it.format}</span>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Add Admin Comment</p>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Optional comment for status changes" />
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <Button size="sm" onClick={() => updateStatus(selectedOrder.id, "approved")} className="bg-green-600 hover:bg-green-700 text-white text-xs">Approve</Button>
+                  <Button size="sm" variant="destructive" onClick={() => updateStatus(selectedOrder.id, "rejected")} className="text-xs">Reject</Button>
+                  <Button size="sm" onClick={() => updateStatus(selectedOrder.id, "shipped")} className="bg-blue-600 hover:bg-blue-700 text-white text-xs">Ship</Button>
+                  <Button size="sm" onClick={() => updateStatus(selectedOrder.id, "completed")} className="text-xs">Complete</Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Status History</p>
+                <div className="rounded border p-3 space-y-2">
+                  {(selectedOrder as any).status_history?.length ? (
+                    (selectedOrder as any).status_history.map((ev: any, i: number) => (
+                      <div key={i} className="text-sm">
+                        <span className="font-semibold">{String(ev.status).toUpperCase()}</span>
+                        <span className="ml-2 text-muted-foreground">{new Date(ev.timestamp).toLocaleString()}</span>
+                        {ev.comment && <span className="ml-2">— {ev.comment}</span>}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No history available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

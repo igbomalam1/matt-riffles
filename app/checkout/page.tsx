@@ -172,6 +172,7 @@ export default function CheckoutPage() {
       }
 
       // Create order
+      const now = new Date().toISOString()
       const { error } = await supabase.from("orders").insert({
         order_number: newOrderNumber,
         customer_name: formData.name,
@@ -182,6 +183,7 @@ export default function CheckoutPage() {
         payment_method: formData.paymentMethod,
         payment_details: paymentDetails,
         status: "pending",
+        updated_at: now,
       })
 
       if (error) throw error
@@ -846,6 +848,14 @@ Thank you for your purchase!
             <div className="bg-secondary p-4 rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Order Number</p>
               <p className="font-mono font-bold">{orderNumber}</p>
+            </div>
+            <div className="rounded border p-3">
+              <p className="text-sm">Your order ID: <span className="font-mono">{orderNumber}</span>. Please use this ID to track your order status.</p>
+              <div className="mt-2">
+                <a href={`/track?order=${encodeURIComponent(orderNumber)}`}>
+                  <Button className="bg-gold text-black">Check Status Now</Button>
+                </a>
+              </div>
             </div>
             {item.type === "ticket" && (
               <div className="border rounded-lg p-4">
