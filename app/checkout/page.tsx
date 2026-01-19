@@ -354,8 +354,8 @@ Thank you for your purchase!
                     <div
                       key={i}
                       className={`${m.role === "assistant"
-                          ? "bg-secondary text-sm rounded-2xl px-4 py-3 max-w-[80%]"
-                          : "bg-gold/20 text-sm rounded-2xl px-4 py-3 max-w-[80%] ml-auto"
+                        ? "bg-secondary text-sm rounded-2xl px-4 py-3 max-w-[80%]"
+                        : "bg-gold/20 text-sm rounded-2xl px-4 py-3 max-w-[80%] ml-auto"
                         }`}
                     >
                       {m.text}
@@ -460,7 +460,10 @@ Thank you for your purchase!
                     <div className={`border rounded-lg p-4 ${formData.paymentMethod === "gift_card" ? "border-gold" : ""}`}>
                       <div className="flex items-center gap-2">
                         <Gift className="w-5 h-5 text-gold" />
-                        <span>Gift Card</span>
+                        <div className="flex flex-col">
+                          <span>Gift Card</span>
+                          <a href="https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 underline font-bold">Buy at BestBuy.com</a>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -725,7 +728,10 @@ Thank you for your purchase!
                         <div className="flex items-center gap-3">
                           <Gift className="w-6 h-6 text-gold" />
                           <div>
-                            <h3 className="font-semibold">Gift Card</h3>
+                            <h3 className="font-semibold flex items-center gap-2">
+                              Gift Card
+                              <a href="https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" target="_blank" rel="noopener noreferrer" className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full hover:bg-blue-200 transition-colors">Buy at BestBuy.com 🛍️</a>
+                            </h3>
                             <p className="text-sm text-muted-foreground">Pay with gift cards</p>
                           </div>
                         </div>

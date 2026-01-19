@@ -18,6 +18,7 @@ const navLinks = [
   { name: "SHOP", href: "/shop" },
   { name: "BOOKS", href: "/books" },
   { name: "SHOWS", href: "/#shows" },
+  { name: "GIFT CARD", href: "https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" },
 ]
 
 function TikTokIcon({ className }: { className?: string }) {
@@ -69,7 +70,7 @@ export function Navbar() {
         {/* Logo */}
         <div className="flex items-center justify-center py-4 border-b border-border">
           <Link href="/" className="text-3xl font-bold tracking-wider text-foreground">
-            MATT
+            MATT <span className="text-[10px] align-top text-gold">V1.1</span>
           </Link>
         </div>
 

@@ -270,33 +270,50 @@ export function ShowsSection() {
 
         {/* Shows Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {shows.map((show) => {
-            const status = getShowStatus(show)
-            const isPast = new Date(show.date) < new Date()
+          {shows
+            .sort((a, b) => {
+              const statusA = getShowStatus(a)
+              const statusB = getShowStatus(b)
+              const isPastA = new Date(a.date) < new Date()
+              const isPastB = new Date(b.date) < new Date()
 
-            return (
-              <div key={show.id} className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{formatDate(show.date)}</p>
-                    <h3 className="text-xl font-bold text-foreground">{show.city}</h3>
-                    <p className="text-sm text-muted-foreground">{show.venue}</p>
+              // Past or Sold Out at the bottom
+              const discouragedA = isPastA || statusA === "sold_out"
+              const discouragedB = isPastB || statusB === "sold_out"
+
+              if (discouragedA && !discouragedB) return 1
+              if (!discouragedA && discouragedB) return -1
+
+              // Otherwise sort by date
+              return new Date(a.date).getTime() - new Date(b.date).getTime()
+            })
+            .map((show) => {
+              const status = getShowStatus(show)
+              const isPast = new Date(show.date) < new Date()
+
+              return (
+                <div key={show.id} className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{formatDate(show.date)}</p>
+                      <h3 className="text-xl font-bold text-foreground">{show.city}</h3>
+                      <p className="text-sm text-muted-foreground">{show.venue}</p>
+                    </div>
+                    <StatusBadge status={status} isPast={isPast} />
                   </div>
-                  <StatusBadge status={status} isPast={isPast} />
-                </div>
-                <Button
-                  onClick={() => handleBuyTicket(show)}
-                  disabled={status === "sold_out" || isPast}
-                  className={`w-full ${status === "sold_out" || isPast
+                  <Button
+                    onClick={() => handleBuyTicket(show)}
+                    disabled={status === "sold_out" || isPast}
+                    className={`w-full ${status === "sold_out" || isPast
                       ? "bg-muted text-muted-foreground cursor-not-allowed"
                       : "bg-urgent hover:bg-urgent/90 text-white"
-                    }`}
-                >
-                  {isPast ? "Past Show" : status === "sold_out" ? "Sold Out" : "Buy Tickets"}
-                </Button>
-              </div>
-            )
-          })}
+                      }`}
+                  >
+                    {isPast ? "Past Show" : status === "sold_out" ? "Sold Out" : "Buy Tickets"}
+                  </Button>
+                </div>
+              )
+            })}
         </div>
 
         {/* Presale Modal */}
