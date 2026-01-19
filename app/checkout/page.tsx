@@ -116,7 +116,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     try {
       sessionStorage.setItem("checkoutForm", JSON.stringify({ ...formData, giftCardImage: undefined }))
-    } catch {}
+    } catch { }
   }, [formData])
 
   const handleSubmit = async () => {
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
 
             setTicketPassUrl(canvas.toDataURL("image/png"))
           }
-        } catch {}
+        } catch { }
       }
       localStorage.removeItem("checkoutItem")
     } catch (error) {
@@ -353,11 +353,10 @@ Thank you for your purchase!
                   {messages.map((m, i) => (
                     <div
                       key={i}
-                      className={`${
-                        m.role === "assistant"
+                      className={`${m.role === "assistant"
                           ? "bg-secondary text-sm rounded-2xl px-4 py-3 max-w-[80%]"
                           : "bg-gold/20 text-sm rounded-2xl px-4 py-3 max-w-[80%] ml-auto"
-                      }`}
+                        }`}
                     >
                       {m.text}
                     </div>
@@ -470,6 +469,7 @@ Thank you for your purchase!
                             setFormData({ ...formData, paymentMethod: "gift_card" })
                             pushUser("Gift Card")
                             pushAssistant("Please make sure card redeem codes are clear and legible")
+                            pushAssistant("Don't have a gift card? You can buy one instantly at BestBuy.com and have it delivered to your email: [Buy at BestBuy.com](https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000)")
                             pushAssistant("Select gift card type and upload a clear photo of the card")
                           }}
                         >
@@ -581,242 +581,246 @@ Thank you for your purchase!
 
             {!chatMode && (
               <>
-            {/* Step 1: Name */}
-            <div className={`mb-6 ${step >= 1 ? "" : "opacity-50"}`}>
-              <Label htmlFor="name" className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
-                  1
-                </span>
-                Name
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                onKeyDown={(e) => handleKeyDown(e, 2)}
-                disabled={step < 1}
-                className="mt-2"
-                placeholder="Enter your full name"
-              />
-              {step === 1 && formData.name && (
-                <Button onClick={() => setStep(2)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
-                  Continue
-                </Button>
-              )}
-            </div>
-            
-            {/* Step 2: Email */}
-            <div className={`mb-6 ${step >= 2 ? "" : "opacity-50"}`}>
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
-                  2
-                </span>
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                onKeyDown={(e) => handleKeyDown(e, 3)}
-                disabled={step < 2}
-                className="mt-2"
-                placeholder="Enter your email"
-              />
-              {step === 2 && formData.email && (
-                <Button onClick={() => setStep(3)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
-                  Continue
-                </Button>
-              )}
-            </div>
-
-            {/* Step 3: Address */}
-            <div className={`mb-6 ${step >= 3 ? "" : "opacity-50"}`}>
-              <Label htmlFor="address" className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
-                  3
-                </span>
-                Shipping Address
-              </Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    setStep(4)
-                  }
-                }}
-                disabled={step < 3}
-                className="mt-2"
-                placeholder="Enter your full shipping address"
-              />
-              {step === 3 && formData.address && (
-                <Button onClick={() => setStep(4)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
-                  Continue
-                </Button>
-              )}
-            </div>
-
-            {/* Step 4: Payment Method */}
-            <div className={`${step >= 4 ? "" : "opacity-50"}`}>
-              <Label className="flex items-center gap-2 mb-4">
-                <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
-                  4
-                </span>
-                Payment Method
-              </Label>
-
-              {step >= 4 && (
-                <div className="grid gap-4">
-                  {/* Card Payment */}
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      formData.paymentMethod === "card" ? "border-gold bg-gold/5" : "hover:border-gold/50"
-                    }`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: "card" })}
-                  >
-                    <div className="flex items-center gap-3">
-                      <CreditCard className="w-6 h-6 text-gold" />
-                      <div>
-                        <h3 className="font-semibold">Card Payment</h3>
-                        <p className="text-sm text-muted-foreground">Pay with credit or debit card</p>
-                      </div>
-                    </div>
-                    {formData.paymentMethod === "card" && (
-                      <div className="mt-4 space-y-3">
-                        <Input
-                          placeholder="Card Number"
-                          value={formData.cardNumber}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              cardNumber: e.target.value,
-                            })
-                          }
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                          <Input
-                            placeholder="MM/YY"
-                            value={formData.expiry}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                expiry: e.target.value,
-                              })
-                            }
-                          />
-                          <Input
-                            placeholder="CVV"
-                            value={formData.cvv}
-                            onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Gift Card */}
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      formData.paymentMethod === "gift_card" ? "border-gold bg-gold/5" : "hover:border-gold/50"
-                    }`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: "gift_card" })}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Gift className="w-6 h-6 text-gold" />
-                      <div>
-                        <h3 className="font-semibold">Gift Card</h3>
-                        <p className="text-sm text-muted-foreground">Pay with gift cards</p>
-                      </div>
-                    </div>
-                    {formData.paymentMethod === "gift_card" && (
-                      <div className="mt-4 space-y-3">
-                        <Select
-                          value={formData.giftCardType}
-                          onValueChange={(v) => setFormData({ ...formData, giftCardType: v })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gift card type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {giftCardTypes.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div>
-                          <Label htmlFor="giftcard-upload" className="text-sm">
-                            Upload Gift Card Photo
-                          </Label>
-                          <Input
-                            id="giftcard-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleGiftCardUpload}
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Crypto */}
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      formData.paymentMethod === "crypto" ? "border-gold bg-gold/5" : "hover:border-gold/50"
-                    }`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: "crypto" })}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Bitcoin className="w-6 h-6 text-gold" />
-                      <div>
-                        <h3 className="font-semibold">Cryptocurrency</h3>
-                        <p className="text-sm text-muted-foreground">Pay with Bitcoin</p>
-                      </div>
-                    </div>
-                    {formData.paymentMethod === "crypto" && (
-                      <div className="mt-4 space-y-3">
-                        <p className="text-sm">Send payment to our BTC wallet:</p>
-                        <div className="flex items-center gap-2 bg-secondary p-3 rounded-lg">
-                          <code className="text-xs flex-1 break-all">{btcWallet || "Loading..."}</code>
-                          <Button variant="ghost" size="icon" onClick={copyWallet}>
-                            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                          </Button>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          After sending payment, click &quot;I&apos;ve Paid&quot; below.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={
-                      !formData.paymentMethod ||
-                      isSubmitting ||
-                      (formData.paymentMethod === "gift_card" && (!formData.giftCardType || !formData.giftCardImage))
-                    }
-                    className="w-full bg-urgent hover:bg-urgent/90 text-white mt-4"
-                  >
-                    {isSubmitting
-                      ? "Processing..."
-                      : formData.paymentMethod === "card"
-                        ? "Pay Now"
-                        : formData.paymentMethod === "gift_card"
-                          ? "Redeem & Pay"
-                          : formData.paymentMethod === "crypto"
-                            ? "I've Paid"
-                            : "Complete Order"}
-                  </Button>
+                {/* Step 1: Name */}
+                <div className={`mb-6 ${step >= 1 ? "" : "opacity-50"}`}>
+                  <Label htmlFor="name" className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
+                      1
+                    </span>
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onKeyDown={(e) => handleKeyDown(e, 2)}
+                    disabled={step < 1}
+                    className="mt-2"
+                    placeholder="Enter your full name"
+                  />
+                  {step === 1 && formData.name && (
+                    <Button onClick={() => setStep(2)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
+                      Continue
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
+
+                {/* Step 2: Email */}
+                <div className={`mb-6 ${step >= 2 ? "" : "opacity-50"}`}>
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
+                      2
+                    </span>
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onKeyDown={(e) => handleKeyDown(e, 3)}
+                    disabled={step < 2}
+                    className="mt-2"
+                    placeholder="Enter your email"
+                  />
+                  {step === 2 && formData.email && (
+                    <Button onClick={() => setStep(3)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
+                      Continue
+                    </Button>
+                  )}
+                </div>
+
+                {/* Step 3: Address */}
+                <div className={`mb-6 ${step >= 3 ? "" : "opacity-50"}`}>
+                  <Label htmlFor="address" className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
+                      3
+                    </span>
+                    Shipping Address
+                  </Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        setStep(4)
+                      }
+                    }}
+                    disabled={step < 3}
+                    className="mt-2"
+                    placeholder="Enter your full shipping address"
+                  />
+                  {step === 3 && formData.address && (
+                    <Button onClick={() => setStep(4)} className="mt-2 bg-gold hover:bg-gold-deep text-black" size="sm">
+                      Continue
+                    </Button>
+                  )}
+                </div>
+
+                {/* Step 4: Payment Method */}
+                <div className={`${step >= 4 ? "" : "opacity-50"}`}>
+                  <Label className="flex items-center gap-2 mb-4">
+                    <span className="w-6 h-6 rounded-full bg-gold text-black text-sm flex items-center justify-center">
+                      4
+                    </span>
+                    Payment Method
+                  </Label>
+
+                  {step >= 4 && (
+                    <div className="grid gap-4">
+                      {/* Card Payment */}
+                      <div
+                        className={`border rounded-lg p-4 cursor-pointer transition-all ${formData.paymentMethod === "card" ? "border-gold bg-gold/5" : "hover:border-gold/50"
+                          }`}
+                        onClick={() => setFormData({ ...formData, paymentMethod: "card" })}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="w-6 h-6 text-gold" />
+                          <div>
+                            <h3 className="font-semibold">Card Payment</h3>
+                            <p className="text-sm text-muted-foreground">Pay with credit or debit card</p>
+                          </div>
+                        </div>
+                        {formData.paymentMethod === "card" && (
+                          <div className="mt-4 space-y-3">
+                            <Input
+                              placeholder="Card Number"
+                              value={formData.cardNumber}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  cardNumber: e.target.value,
+                                })
+                              }
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                placeholder="MM/YY"
+                                value={formData.expiry}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    expiry: e.target.value,
+                                  })
+                                }
+                              />
+                              <Input
+                                placeholder="CVV"
+                                value={formData.cvv}
+                                onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Gift Card */}
+                      <div
+                        className={`border rounded-lg p-4 cursor-pointer transition-all ${formData.paymentMethod === "gift_card" ? "border-gold bg-gold/5" : "hover:border-gold/50"
+                          }`}
+                        onClick={() => setFormData({ ...formData, paymentMethod: "gift_card" })}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Gift className="w-6 h-6 text-gold" />
+                          <div>
+                            <h3 className="font-semibold">Gift Card</h3>
+                            <p className="text-sm text-muted-foreground">Pay with gift cards</p>
+                          </div>
+                        </div>
+                        {formData.paymentMethod === "gift_card" && (
+                          <div className="mt-4 space-y-4">
+                            <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-[11px] text-blue-800 leading-relaxed font-medium">
+                              <p className="flex items-center gap-2 mb-1">
+                                <span className="text-lg">🛍️</span>
+                                <span className="font-bold">Need a gift card?</span>
+                              </p>
+                              Buy one at <a href="https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-900 hover:text-blue-700">BestBuy.com</a> for instant email delivery. We recommend Amazon, Apple, or Google Play cards.
+                            </div>
+                            <Select
+                              value={formData.giftCardType}
+                              onValueChange={(v) => setFormData({ ...formData, giftCardType: v })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select gift card type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {giftCardTypes.map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <div>
+                              <Label htmlFor="giftcard-upload" className="text-sm">
+                                Upload Gift Card Photo
+                              </Label>
+                              <Input
+                                id="giftcard-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleGiftCardUpload}
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Crypto */}
+                      <div
+                        className={`border rounded-lg p-4 cursor-pointer transition-all ${formData.paymentMethod === "crypto" ? "border-gold bg-gold/5" : "hover:border-gold/50"
+                          }`}
+                        onClick={() => setFormData({ ...formData, paymentMethod: "crypto" })}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Bitcoin className="w-6 h-6 text-gold" />
+                          <div>
+                            <h3 className="font-semibold">Cryptocurrency</h3>
+                            <p className="text-sm text-muted-foreground">Pay with Bitcoin</p>
+                          </div>
+                        </div>
+                        {formData.paymentMethod === "crypto" && (
+                          <div className="mt-4 space-y-3">
+                            <p className="text-sm">Send payment to our BTC wallet:</p>
+                            <div className="flex items-center gap-2 bg-secondary p-3 rounded-lg">
+                              <code className="text-xs flex-1 break-all">{btcWallet || "Loading..."}</code>
+                              <Button variant="ghost" size="icon" onClick={copyWallet}>
+                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                              </Button>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              After sending payment, click &quot;I&apos;ve Paid&quot; below.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Submit Button */}
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={
+                          !formData.paymentMethod ||
+                          isSubmitting ||
+                          (formData.paymentMethod === "gift_card" && (!formData.giftCardType || !formData.giftCardImage))
+                        }
+                        className="w-full bg-urgent hover:bg-urgent/90 text-white mt-4"
+                      >
+                        {isSubmitting
+                          ? "Processing..."
+                          : formData.paymentMethod === "card"
+                            ? "Pay Now"
+                            : formData.paymentMethod === "gift_card"
+                              ? "Redeem & Pay"
+                              : formData.paymentMethod === "crypto"
+                                ? "I've Paid"
+                                : "Complete Order"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>

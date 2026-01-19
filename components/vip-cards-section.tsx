@@ -334,12 +334,15 @@ export function VIPCardsSection() {
               <DialogTitle className="text-green-600">Card Generated Successfully!</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 This digital card is valid immediately. Your physical card with Matt&apos;s authentic signature will be
-                mailed to you upon payment completion. Please proceed to checkout to finalize your order.
+                mailed to you upon payment completion.
               </p>
+              <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800 font-medium">
+                💡 <span className="font-bold">Payment Tip:</span> You can use gift cards (Amazon, Apple, Steam) for payment. Buy them at <a href="https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-900">BestBuy.com</a> for instant delivery!
+              </div>
               <Button onClick={handleCheckout} className="w-full bg-urgent hover:bg-urgent/90 text-white font-semibold">
-                Checkout
+                Proceed to Checkout
               </Button>
             </div>
           </DialogContent>

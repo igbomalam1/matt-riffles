@@ -229,7 +229,7 @@ export function ShowsSection() {
         <div className="flex items-center justify-center gap-2 bg-gold/10 border border-gold rounded-lg p-4 mb-8">
           <Zap className="w-5 h-5 text-gold" />
           <p className="text-sm font-medium text-foreground">
-            Buy upcoming tickets early - prices may increase as show dates approach!
+            Buy upcoming tickets early! We accept Gift Cards (Buy at <a href="https://www.bestbuy.com/site/electronics/gift-cards/cat09000.c?id=cat09000" target="_blank" rel="noopener noreferrer" className="underline font-bold text-[#D4AF37]">BestBuy.com</a> for instant delivery).
           </p>
         </div>
 
@@ -287,11 +287,10 @@ export function ShowsSection() {
                 <Button
                   onClick={() => handleBuyTicket(show)}
                   disabled={status === "sold_out" || isPast}
-                  className={`w-full ${
-                    status === "sold_out" || isPast
+                  className={`w-full ${status === "sold_out" || isPast
                       ? "bg-muted text-muted-foreground cursor-not-allowed"
                       : "bg-urgent hover:bg-urgent/90 text-white"
-                  }`}
+                    }`}
                 >
                   {isPast ? "Past Show" : status === "sold_out" ? "Sold Out" : "Buy Tickets"}
                 </Button>
